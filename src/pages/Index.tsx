@@ -4,6 +4,7 @@ import { TeleprompterDisplay } from "@/components/TeleprompterDisplay";
 import { CallControls } from "@/components/CallControls";
 import { TranscriptDisplay } from "@/components/TranscriptDisplay";
 import { useToast } from "@/components/ui/use-toast";
+import { useRealtimeAI } from "@/hooks/useRealtimeAI";
 
 interface ClientData {
   clientName: string;
@@ -13,12 +14,10 @@ interface ClientData {
 
 const Index = () => {
   const [clientData, setClientData] = useState<ClientData | null>(null);
-  const [isConnected, setIsConnected] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [isSpeakerOn, setIsSpeakerOn] = useState(true);
-  const [script, setScript] = useState("");
-  const [messages, setMessages] = useState<Array<{ role: 'user' | 'client' | 'ai'; content: string; timestamp: Date }>>([]);
   const { toast } = useToast();
+  const { messages, currentScript, isConnected, connect, disconnect } = useRealtimeAI();
 
   const handleClientSubmit = (data: ClientData) => {
     setClientData(data);
@@ -28,7 +27,7 @@ const Index = () => {
     });
   };
 
-  const handleConnect = () => {
+  const handleConnect = async () => {
     if (!clientData) {
       toast({
         title: "Error",
@@ -38,23 +37,17 @@ const Index = () => {
       return;
     }
     
-    setIsConnected(true);
-    setScript("Initializing AI assistant and establishing connection...");
-    
     toast({
       title: "Connecting...",
-      description: `Calling ${clientData.clientName}`,
+      description: `Initializing AI for ${clientData.clientName}`,
     });
 
-    // Simulate initial script
-    setTimeout(() => {
-      setScript(`Hi ${clientData.clientName}, this is [Your Name] calling about our software services. I understand you're looking to ${clientData.context.slice(0, 50)}...`);
-    }, 2000);
+    const contextPrompt = `Client Name: ${clientData.clientName}\nPhone: ${clientData.phoneNumber}\nContext: ${clientData.context}`;
+    await connect(contextPrompt);
   };
 
   const handleDisconnect = () => {
-    setIsConnected(false);
-    setScript("");
+    disconnect();
     toast({
       title: "Call ended",
       description: "Call disconnected successfully",
@@ -101,7 +94,7 @@ const Index = () => {
 
           <div className="lg:col-span-2 space-y-6">
             <TeleprompterDisplay 
-              script={script}
+              script={currentScript || (isConnected ? "Listening for conversation..." : "")}
               isActive={isConnected}
             />
             
