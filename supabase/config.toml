@@ -1,1 +1,4 @@
 project_id = "bmkfduxysyfebcecvvjp"
+
+[functions.realtime-ai]
+verify_jwt = false

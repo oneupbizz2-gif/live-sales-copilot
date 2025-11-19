@@ -99,10 +99,12 @@ export const useRealtimeAI = () => {
       };
 
       wsRef.current.onerror = (error) => {
-        console.error('WebSocket error:', error);
+        console.error('WebSocket error details:', error);
+        console.error('WebSocket URL:', wsUrl);
+        console.error('WebSocket readyState:', wsRef.current?.readyState);
         toast({
           title: 'Connection Error',
-          description: 'Failed to connect to AI service',
+          description: 'Failed to connect to AI service. Check console for details.',
           variant: 'destructive'
         });
       };

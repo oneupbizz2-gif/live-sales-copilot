@@ -22,8 +22,15 @@ serve(async (req) => {
   const OPENAI_API_KEY = Deno.env.get('OPENAI_API_KEY');
   if (!OPENAI_API_KEY) {
     console.error("OPENAI_API_KEY not configured");
-    return new Response("Server configuration error", { status: 500 });
+    socket.send(JSON.stringify({ 
+      type: 'error', 
+      message: 'OPENAI_API_KEY not configured on server' 
+    }));
+    socket.close();
+    return response;
   }
+  
+  console.log("OPENAI_API_KEY is configured");
 
   let openAISocket: WebSocket | null = null;
   let clientContext = "";
