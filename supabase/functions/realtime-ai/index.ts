@@ -48,15 +48,11 @@ serve(async (req) => {
         // Initialize OpenAI connection with client context
         clientContext = message.context || "";
         
-        // Create WebSocket URL with authorization
-        const wsUrl = new URL("wss://api.openai.com/v1/realtime");
-        wsUrl.searchParams.set("model", "gpt-4o-realtime-preview-2024-10-01");
-        
-        openAISocket = new WebSocket(wsUrl.toString(), [
-          "realtime",
-          `openai-insecure-api-key.${OPENAI_API_KEY}`,
-          "openai-beta.realtime-v1"
-        ]);
+        // Create WebSocket connection to OpenAI using protocol-based auth
+        openAISocket = new WebSocket(
+          "wss://api.openai.com/v1/realtime?model=gpt-4o-realtime-preview-2024-10-01",
+          `openai-insecure-api-key.${OPENAI_API_KEY}`
+        );
 
         openAISocket.onopen = () => {
           console.log("OpenAI WebSocket connected");
